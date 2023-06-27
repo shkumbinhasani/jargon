@@ -4,3 +4,11 @@ POST http://localhost:3000/
     "name": "test",
     "email": ""
 }
+
+### Post
+POST http://localhost:3000/users?name=test
+Content-Type: application/json
+
+{
+  "name": "test"
+}

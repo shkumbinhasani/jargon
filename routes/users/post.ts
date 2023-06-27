@@ -1,19 +1,15 @@
 import {z} from "zod";
-import {jargonRequest} from "../../framework/route";
+import {jargonRequest} from "../../framework/jargonRequest";
 
 export default jargonRequest({
-    paramsSchema: z.object({
+    bodySchema: z.object({
         name: z.string()
     }),
-    responseSchema: z.object({
-        message: z.string()
-    }),
-    querySchema: z.object({
-        id: z.coerce.number()
-    }),
-    handler: async ({params, query}) => {
+    handler: async ({params, query, body}) => {
         return {
-            message: `People ${params.name} ${query.id}`
+            params,
+            query,
+            body
         }
     }
 });

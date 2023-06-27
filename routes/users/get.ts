@@ -1,5 +1,5 @@
 import {z} from "zod";
-import {jargonRequest} from "../../framework/route";
+import {jargonRequest} from "../../framework/jargonRequest";
 
 export default jargonRequest({
     responseSchema: z.object({
@@ -12,7 +12,7 @@ export default jargonRequest({
         limit: z.number().max(100).optional(),
         offset: z.number().optional()
     }),
-    handler: async ({params, query}) => {
+    handler: async ({}) => {
         // logic
         // const users = getUsers(params.filter, query.limit, query.offset);
         return [
