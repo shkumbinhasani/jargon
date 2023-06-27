@@ -27,11 +27,6 @@ export async function handleHttpRequest(routes: RoutesInterface, req: IncomingMe
  * @param req Incoming HTTP request
  * @returns Parsed request parts (path, queryParams, body, headers)
  */
-/**
- * Helper function for parsing request to extract its parts
- * @param req Incoming HTTP request
- * @returns Parsed request parts (path, queryParams, body, headers)
- */
 async function parseRequest(req: IncomingMessage) {
     // URL and query params
     const [url, ...queryParams] = req.url?.split("?") || [];
