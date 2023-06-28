@@ -1,6 +1,6 @@
 import {IncomingMessage} from "http";
 import {RoutesInterface} from "./routes";
-import {NotFoundError} from "../http-errors";
+import {NotFoundError} from "./HttpErrors";
 import {HandlerFunction} from "./jargonEndpoint";
 import {ZodSchema} from "zod";
 import {JargonResponse} from "./JargonResponse";

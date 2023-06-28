@@ -4,7 +4,7 @@
  */
 
 import {z, ZodSchema} from 'zod';
-import {BadGatewayError, BadRequestError} from '../http-errors';
+import {BadGatewayError, BadRequestError} from './HttpErrors';
 import {Headers} from "./types";
 import {JargonResponse} from "./JargonResponse";
 

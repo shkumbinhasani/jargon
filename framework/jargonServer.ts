@@ -15,7 +15,7 @@
  */
 import {RoutesInterface} from "./routes";
 import {handleHttpRequest} from "./requestHandler";
-import {HttpError} from "../http-errors";
+import {HttpError} from "./HttpErrors";
 import * as http from 'http';
 import {JargonResponse} from "./JargonResponse";
 
