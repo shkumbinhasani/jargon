@@ -3,6 +3,7 @@ import {RoutesInterface} from "./routes";
 import {NotFoundError} from "../http-errors";
 import {HandlerFunction} from "./jargonEndpoint";
 import {ZodSchema} from "zod";
+import {JargonResponse} from "./JargonResponse";
 
 /**
  * Parses the request and invokes the appropriate route handler.
@@ -16,6 +17,9 @@ export async function handleHttpRequest(routes: RoutesInterface, req: IncomingMe
 
     if (fn?.handler) {
         const response = await fn.handler(fn.params, queryParams, body, headers);
+        if (response instanceof JargonResponse) {
+            return response;
+        }
         return {
             status: response ? 200 : 204,
             body: response,
@@ -39,9 +43,6 @@ async function parseRequest(req: IncomingMessage) {
     // Request body
     const body = await bodyParser(req);
 
-    // Parsed JSON body
-    const bodyJson = body ? JSON.parse(body) : undefined;
-
     // Request path
     const path = url?.split("/").filter(Boolean) || [];
     path.push(req.method?.toUpperCase() || 'GET');
@@ -49,7 +50,7 @@ async function parseRequest(req: IncomingMessage) {
     return {
         path,
         queryParams: query,
-        body: bodyJson,
+        body: body,
         headers: req.headers as Record<string, string>
     };
 }
@@ -78,7 +79,7 @@ function bodyParser(req: IncomingMessage): Promise<any> {
     return new Promise<any>((resolve, reject) => {
         let body = "";
         req.on("data", (chunk: any) => {
-            body += chunk;
+            body += chunk.toString();
         });
         req.on("end", () => {
             try {

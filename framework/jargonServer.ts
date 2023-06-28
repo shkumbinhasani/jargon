@@ -17,12 +17,20 @@ import {RoutesInterface} from "./routes";
 import {handleHttpRequest} from "./requestHandler";
 import {HttpError} from "../http-errors";
 import * as http from 'http';
+import {JargonResponse} from "./JargonResponse";
 
 const jargonServer = (routes: RoutesInterface, port: number, callback: () => void) => {
     const server = http.createServer(async (req, res) => {
-
         try {
             const response = await handleHttpRequest(routes, req);
+            if (response instanceof JargonResponse) {
+                res.writeHead(response.status, {
+                    'Content-Type': 'application/json',
+                    ...response.headers
+                });
+                res.end(JSON.stringify(response.body, null, 2));
+                return;
+            }
             res.writeHead(response.status, {'Content-Type': 'application/json'});
             res.end(JSON.stringify(response.body, null, 2));
         } catch (e) {

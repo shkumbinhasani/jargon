@@ -6,6 +6,7 @@
 import {z, ZodSchema} from 'zod';
 import {BadGatewayError, BadRequestError} from '../http-errors';
 import {Headers} from "./types";
+import {JargonResponse} from "./JargonResponse";
 
 /**
  * Function to parse and validate data using a Zod schema. If passed schema is
@@ -77,7 +78,7 @@ export function jargonEndpoint<P extends ZodSchema, Q extends ZodSchema, B exten
         body: IfAnyUnknown<z.infer<B>>;
         headers: Headers;
         user: U | undefined;
-    }): z.infer<R> | Promise<z.infer<R>>;
+    }): z.infer<R> | Promise<z.infer<R>> | JargonResponse<z.infer<R>> | Promise<JargonResponse<z.infer<R>>>;
 }): HandlerFunction<R> {
     return async (params: unknown, query: unknown, body: unknown, headers: Headers) => {
         // Parse and validate the params, query, and body with the corresponding schemas.
@@ -102,6 +103,10 @@ export function jargonEndpoint<P extends ZodSchema, Q extends ZodSchema, B exten
         });
 
         // Validate the response with the response schema.
+        if(response instanceof JargonResponse) {
+            response.body = parseData(response.body, args.responseSchema, 'response');
+            return response;
+        }
         return parseData(response, args.responseSchema, 'response');
     };
 }
