@@ -1,7 +1,7 @@
 import {z} from "zod";
-import {jargonRequest} from "../../framework/jargonRequest";
+import {jargonEndpoint} from "../../framework/jargonEndpoint";
 
-export default jargonRequest({
+export default jargonEndpoint({
     bodySchema: z.object({
         name: z.string()
     }),

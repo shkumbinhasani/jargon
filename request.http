@@ -1,14 +1,10 @@
-POST http://localhost:3000/
-
-{
-    "name": "test",
-    "email": ""
-}
-
-### Post
-POST http://localhost:3000/users?name=test
+### Get Users
+GET http://localhost:3000/users
 Content-Type: application/json
 
-{
-  "name": "test"
-}
+### Get User
+GET http://localhost:3000/users/1
+
+### Create User
+POST http://localhost:3000/users
+Content-Type: application/json

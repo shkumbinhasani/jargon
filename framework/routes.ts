@@ -42,7 +42,7 @@ function folderToObj(folderPath: string, base?: string): RoutesInterface {
                 try {
                     result[methodName] = require(`${filePath}`).default;
                 } catch {
-                    // throw new Error(`No default export in ${path}`);
+                    console.warn(`No default export in ${path}`);
                 }
             }
         }

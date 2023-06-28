@@ -5,6 +5,7 @@
 
 import {z, ZodSchema} from 'zod';
 import {BadGatewayError, BadRequestError} from '../http-errors';
+import {Headers} from "./types";
 
 /**
  * Function to parse and validate data using a Zod schema. If passed schema is
@@ -16,7 +17,7 @@ import {BadGatewayError, BadRequestError} from '../http-errors';
  * @returns {unknown} Returns validated data.
  * @throws {BadRequestError | BadGatewayError} If data validation fails.
  */
-function parseData<T extends ZodSchema>(data: unknown, schema?: T, dataType?: 'params' | 'query' | 'response' | 'body') {
+function parseData<T extends ZodSchema>(data: unknown, schema?: T, dataType?: 'params' | 'query' | 'response' | 'body'): unknown {
     if (schema) {
         const validation = schema.safeParse(data);
         if (!validation.success) {
@@ -38,6 +39,16 @@ function parseData<T extends ZodSchema>(data: unknown, schema?: T, dataType?: 'p
 type IfAnyUnknown<T> = 0 extends (1 & T) ? unknown : T;
 
 /**
+ * `HandlerFunction` is a type of function that will be used in your application as a request handler.
+ * @template R - It is a ZodSchema. ZodSchema is a schema definition, basically describing the shape of an object you will validate.
+ * @param params - This parameter can be of any type (`unknown` type is used) and represents parameters received from the request.
+ * @param query - This parameter can be of any type (`unknown` type is used) and represents a query string parameters from the request.
+ * @param body - This parameter can be of any type (`unknown` type is used) and represents the body of the request.
+ * @param headers - An object representing the headers of the request. It's of type `Header`.
+ * @returns {Promise<z.infer<R>>} Promise returning an inferred type of the ZodSchema argument `R`.
+ */
+type HandlerFunction<R extends ZodSchema> = (params: unknown, query: unknown, body: unknown, headers: Headers) => Promise<z.infer<R>>;
+/**
  * A helper function for making requests, providing a structured way to validate their parameters,
  * query, body, and response with Zod schemas, perform optional authentication, and handle the request.
  *
@@ -47,10 +58,10 @@ type IfAnyUnknown<T> = 0 extends (1 & T) ? unknown : T;
  * @template R Response's schema type.
  * @template U User type.
  * @param {Object} args Configuration options for the request.
- * @returns {Function} Returns an async function that accepts the params, query, body, and headers,
+ * @returns {HandlerFunction<R>} Returns an async function that accepts the params, query, body, and headers,
  *  then validates and processes the request accordingly.
  */
-export function jargonRequest<P extends ZodSchema, Q extends ZodSchema, B extends ZodSchema, R extends ZodSchema, U>(args: {
+export function jargonEndpoint<P extends ZodSchema, Q extends ZodSchema, B extends ZodSchema, R extends ZodSchema, U>(args: {
     paramsSchema?: P;
     querySchema?: Q;
     bodySchema?: B;
@@ -58,17 +69,17 @@ export function jargonRequest<P extends ZodSchema, Q extends ZodSchema, B extend
     authentication?: (args: {
         params: z.infer<P>;
         query: z.infer<Q>;
-        headers: Record<string, string>
+        headers: Headers
     }) => Promise<U> | U;
     handler(args: {
         params: IfAnyUnknown<z.infer<P>>;
         query: IfAnyUnknown<z.infer<Q>>;
         body: IfAnyUnknown<z.infer<B>>;
-        headers: Record<string, string>;
+        headers: Headers;
         user: U | undefined;
     }): z.infer<R> | Promise<z.infer<R>>;
-}) {
-    return async (params: unknown, query: unknown, body: unknown, headers: Record<string, string>) => {
+}): HandlerFunction<R> {
+    return async (params: unknown, query: unknown, body: unknown, headers: Headers) => {
         // Parse and validate the params, query, and body with the corresponding schemas.
         const parsedParams = parseData(params, args.paramsSchema, 'params');
         const parsedQuery = parseData(query, args.querySchema, 'query');

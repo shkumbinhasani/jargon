@@ -1,26 +1,22 @@
 import {z} from "zod";
-import {jargonRequest} from "../../framework/jargonRequest";
+import {jargonEndpoint} from "../../framework/jargonEndpoint";
+import {UserRepository} from "../../src/db/repository/user.repository";
 
-export default jargonRequest({
+export default jargonEndpoint({
     responseSchema: z.object({
         id: z.number(),
-        name: z.string(),
-        age: z.number()
+        fullName: z.string(),
+        phone: z.string(),
+        role: z.enum(['user', 'admin']),
+        createdAt: z.date(),
+        updatedAt: z.date(),
     }).array(),
     querySchema: z.object({
-        filter: z.string().optional(),
-        limit: z.number().max(100).optional(),
-        offset: z.number().optional()
+        filter: z.string().default(''),
+        limit: z.coerce.number().max(100).default(20),
+        offset: z.coerce.number().default(0)
     }),
-    handler: async ({}) => {
-        // logic
-        // const users = getUsers(params.filter, query.limit, query.offset);
-        return [
-            {
-                id: 1,
-                name: 'John',
-                age: 20
-            }
-        ]
+    handler: ({query}) => {
+        return UserRepository.get(query.filter, query.limit, query.offset);
     }
 });
