@@ -47,7 +47,7 @@ type IfAnyUnknown<T> = 0 extends (1 & T) ? unknown : T;
  * @param headers - An object representing the headers of the request. It's of type `Header`.
  * @returns {Promise<z.infer<R>>} Promise returning an inferred type of the ZodSchema argument `R`.
  */
-type HandlerFunction<R extends ZodSchema> = (params: unknown, query: unknown, body: unknown, headers: Headers) => Promise<z.infer<R>>;
+export type HandlerFunction<R extends ZodSchema> = (params: unknown, query: unknown, body: unknown, headers: Headers) => Promise<z.infer<R>>;
 /**
  * A helper function for making requests, providing a structured way to validate their parameters,
  * query, body, and response with Zod schemas, perform optional authentication, and handle the request.

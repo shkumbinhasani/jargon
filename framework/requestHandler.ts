@@ -1,6 +1,8 @@
 import {IncomingMessage} from "http";
 import {RoutesInterface} from "./routes";
 import {NotFoundError} from "../http-errors";
+import {HandlerFunction} from "./jargonEndpoint";
+import {ZodSchema} from "zod";
 
 /**
  * Parses the request and invokes the appropriate route handler.
@@ -13,9 +15,10 @@ export async function handleHttpRequest(routes: RoutesInterface, req: IncomingMe
     const fn = getFunction(path, routes);
 
     if (fn?.handler) {
+        const response = await fn.handler(fn.params, queryParams, body, headers);
         return {
-            status: 200,
-            body: await fn.handler(fn.params, queryParams, body, headers),
+            status: response ? 200 : 204,
+            body: response,
         };
     } else {
         throw new NotFoundError("not-found");
@@ -47,7 +50,7 @@ async function parseRequest(req: IncomingMessage) {
         path,
         queryParams: query,
         body: bodyJson,
-        headers: req.headers,
+        headers: req.headers as Record<string, string>
     };
 }
 
@@ -105,14 +108,17 @@ function getFunction(
     path: string[],
     route: Record<string, any>,
     params: Record<string, string> = {}
-) {
+): {
+    handler: HandlerFunction<ZodSchema>,
+    params: Record<string, string>
+} | void {
     if (path.length > 0) {
         const [first, ...rest] = path;
 
         if (first in route) {
             if (typeof route[first] === "function") {
                 return {
-                    handler: route[first],
+                    handler: route[first] as HandlerFunction<ZodSchema>,
                     params,
                 };
             }
@@ -122,7 +128,6 @@ function getFunction(
                 (key) => key.startsWith("{") && key.endsWith("}")
             );
             const pureParamKey = paramKey.replace("{", "").replace("}", "");
-            console.log("paramKey", paramKey, pureParamKey);
 
             return getFunction(rest, route[paramKey], {
                 ...params,
